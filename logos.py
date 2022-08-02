@@ -17,27 +17,6 @@ headers = {
     'Upgrade-Insecure-Requests' : '1',
     'User-Agent' : 'Mozilla/5.0 (X11; Ubuntu, Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.o'
 }
-"""
-request:
-facetFilterQuery	""
-getStoreResults	false
-includeUnlicensed	false
-offset	null // 50
-query	""
-selectedFacets	[]
-sortField	"title"
-userLanguage	"en-GB"
-
-
-response 
-XHRPOSThttps://app.logos.com/api/app/library/facetedResults
-[HTTP/2 200 OK 502ms]
-
-	
-total	92
-items	[ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
-facets	[ {…}, {…}, {…}, {…}, {…}, {…} ]
-"""
 
 def download_books_list(offset: Union[int, None] = None) -> None:
     url = 'https://app.logos.com/api/app/library/facetedResults'
