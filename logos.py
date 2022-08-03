@@ -1,5 +1,5 @@
 from base64 import encode
-from typing import Union
+from typing import List, Union
 import requests
 import json
 import time
@@ -38,7 +38,7 @@ json_headers: dict[str,str] = {
     'User-Agent' : 'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'
 }
 
-def download_books_list(offset: Union[int, None] = None) -> None:
+def download_books_list(offset: Union[int, None] = None) -> List[dict[str,str]]:
     url = 'https://app.logos.com/api/app/library/facetedResults'
     request = {
         'facetFilterQuery' : "",
@@ -52,7 +52,14 @@ def download_books_list(offset: Union[int, None] = None) -> None:
     }
     response: Response = requests.post(url, json=request, headers=json_headers)
     data = json.loads(response.text)
-    print(data)
+    result: List[dict[str,str]] = []
+    for book in data['items']: 
+        result.append({
+            'title' : book['title'],
+            'id' : book['resourceId'],
+            'coverUrl' : book['coverUrl']
+        })
+    return result
 
 def load_cookie_from_file(filename: str) -> None:
     with open(filename, 'r', encoding='latin-1') as myfile:
@@ -63,5 +70,6 @@ def load_cookie_from_file(filename: str) -> None:
 
 
 load_cookie_from_file('login-data.json')
-print(headers['Cookie'])
-download_books_list()
+books = download_books_list()
+print(books)
+
