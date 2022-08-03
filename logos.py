@@ -1,3 +1,4 @@
+from base64 import encode
 from typing import Union
 import requests
 import json
@@ -49,12 +50,12 @@ def download_books_list(offset: Union[int, None] = None) -> None:
         'sortField' : "title",
         'userLanguage' : "en-GB"
     }
-    response: Response = requests.post(url, data=request, headers=json_headers)
+    response: Response = requests.post(url, json=request, headers=json_headers)
     data = json.loads(response.text)
     print(data)
 
 def load_cookie_from_file(filename: str) -> None:
-    with open(filename, 'r') as myfile:
+    with open(filename, 'r', encoding='latin-1') as myfile:
         file = myfile.read()
         data = json.loads(file)
         json_headers['Cookie'] = data['cookie']
@@ -62,4 +63,5 @@ def load_cookie_from_file(filename: str) -> None:
 
 
 load_cookie_from_file('login-data.json')
+print(headers['Cookie'])
 download_books_list()
