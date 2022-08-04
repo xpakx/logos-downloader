@@ -1,5 +1,7 @@
 from base64 import encode
 from typing import List, Union
+from typing import Optional
+from urllib import response
 import requests
 import json
 import time
@@ -68,19 +70,48 @@ def load_cookie_from_file(filename: str) -> None:
         json_headers['Cookie'] = data['cookie']
         headers['Cookie'] = data['cookie']
 
+def get_book_by_id(book_id: str) -> str:
+    article_id: Optional[str] = 'TITLE'
+    content = ''
+    while(article_id != None):
+        print(article_id)
+        result = download_article_by_id(book_id, article_id if article_id else '')
+        article, article_id = result['content'], result['next']
+        content += "\n\n" + (article if article else '')
+        time.sleep(0.05)
+    return content
+
+def download_article_by_id(book_id: str, article_id: str) -> dict[str,Optional[str]]:
+    url = 'https://app.logos.com/api/app/books/'+book_id+'/articles/'+article_id
+    print(url)
+    response = requests.get(url, headers=headers)
+    data = json.loads(response.text)
+    if 'article' not in data:
+        raise ValueError('No article')
+    result: dict[str,Optional[str]] = {}
+    if 'nextArticleId' not in data:
+        result = {'content' : data['article']['content'], 'next': None}
+    else:
+        result = {'content' : data['article']['content'], 'next': data['nextArticleId']}
+    return result
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cookie', type=str)
+parser.add_argument('-d', '--download', type=str)
 parser.add_argument('-b', '--books', action="store_true")
 args = parser.parse_args()
 
+logged: bool = False;
+if(args.cookie):
+    load_cookie_from_file(args.cookie)
+    logged = True
 
-
-load_cookie_from_file(args.cookie if args.cookie else 'login-data.json')
-
-
-if(args.books):
+if(args.books and logged):
     books = download_books_list()
     print(books)
 
+if(args.download and logged):
+    book: str = get_book_by_id(args.download)
+    with open('book.html', 'w') as html_file:
+        html_file.write(book)
 
