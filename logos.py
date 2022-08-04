@@ -99,6 +99,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cookie', type=str)
 parser.add_argument('-d', '--download', type=str)
 parser.add_argument('-b', '--books', action="store_true")
+parser.add_argument('-o', '--out', type=str)
 args = parser.parse_args()
 
 logged: bool = False;
@@ -112,6 +113,6 @@ if(args.books and logged):
 
 if(args.download and logged):
     book: str = get_book_by_id(args.download)
-    with open('book.html', 'w') as html_file:
+    with open(args.out if args.out else 'book.html', 'w') as html_file:
         html_file.write(book)
 
