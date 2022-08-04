@@ -69,7 +69,15 @@ def load_cookie_from_file(filename: str) -> None:
         headers['Cookie'] = data['cookie']
 
 
-load_cookie_from_file('login-data.json')
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--cookie', type=str)
+args = parser.parse_args()
+
+
+
+load_cookie_from_file(args.cookie if args.cookie else 'login-data.json')
+
+
 books = download_books_list()
 print(books)
 
