@@ -9,6 +9,7 @@ import time
 import argparse
 from io import BytesIO
 from PIL import Image
+from bs4 import BeautifulSoup
 
 from requests import Response
 
@@ -106,7 +107,20 @@ def download_article_by_id(book_id: str, article_id: str) -> dict[str,Optional[s
     return result
 
 def download_images(book_text: str) -> str:
-    return book_text
+    soup = BeautifulSoup(book_text, 'html.parser')
+    imgs = soup.findAll('img')
+    i: int = 0
+    directory = "img/"
+    for img in imgs:
+        i+=1
+        print('{}/{}...'.format(i, len(imgs)))
+        link: str = 'https://app.logos.com' + img['src']
+        name: str = link.split("/")[-1]
+        image = requests.get(link, headers=headers)
+        image_file = Image.open(BytesIO(image.content))
+        image_file.save(directory+name)
+        img['src'] = directory + name
+    return str(soup)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cookie', type=str)
