@@ -71,7 +71,10 @@ def load_cookie_from_file(filename: str) -> None:
         headers['Cookie'] = data['cookie']
 
 def get_book_by_id(book_id: str) -> str:
-    article_id: Optional[str] = 'TITLE'
+    url = "https://app.logos.com/api/app/books/"+book_id
+    response = requests.get(url, headers=headers)
+    data = json.loads(response.text)
+    article_id: Optional[str] = data['nextArticleId']
     content = ''
     while(article_id != None):
         print(article_id)
