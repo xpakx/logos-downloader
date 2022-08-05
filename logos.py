@@ -1,4 +1,5 @@
 from base64 import encode
+from optparse import Option
 from typing import List, Union
 from typing import Optional
 from urllib import response
@@ -6,6 +7,8 @@ import requests
 import json
 import time
 import argparse
+from io import BytesIO
+from PIL import Image
 
 from requests import Response
 
@@ -70,11 +73,15 @@ def load_cookie_from_file(filename: str) -> None:
         json_headers['Cookie'] = data['cookie']
         headers['Cookie'] = data['cookie']
 
-def get_book_by_id(book_id: str) -> str:
+def get_first_article_id(book_id: str) -> Optional[str]:
     url = "https://app.logos.com/api/app/books/"+book_id
     response = requests.get(url, headers=headers)
     data = json.loads(response.text)
-    article_id: Optional[str] = data['nextArticleId']
+    article_id: Optional[str]  = data['nextArticleId']
+    return article_id
+
+def get_book_by_id(book_id: str) -> str:
+    article_id: Optional[str] = get_first_article_id(book_id)
     content = ''
     while(article_id != None):
         print(article_id)
@@ -98,6 +105,9 @@ def download_article_by_id(book_id: str, article_id: str) -> dict[str,Optional[s
         result = {'content' : data['article']['content'], 'next': data['nextArticleId']}
     return result
 
+def download_images(book_text: str) -> str:
+    return book_text
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cookie', type=str)
 parser.add_argument('-d', '--download', type=str)
@@ -112,10 +122,12 @@ if(args.cookie):
 
 if(args.books and logged):
     books = download_books_list()
-    print(books)
+    for entry in books:
+        print(entry['title'] + "\t" + entry['id'])
 
 if(args.download and logged):
     book: str = get_book_by_id(args.download)
+    book = download_images(book)
     with open(args.out if args.out else 'book.html', 'w') as html_file:
         html_file.write(book)
 
