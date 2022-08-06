@@ -83,13 +83,20 @@ def get_first_article_id(book_id: str) -> Optional[str]:
     return article_id
 
 def get_book_by_id(book_id: str) -> str:
-    article_id: Optional[str] = get_first_article_id(book_id)
     content = ''
+    list =  get_book_articles_by_id(book_id)
+    for article in list:
+        content += '\n\n' + article
+    return content
+
+def get_book_articles_by_id(book_id: str) -> List[str]:
+    article_id: Optional[str] = get_first_article_id(book_id)
+    content = []
     while(article_id != None):
         print(article_id)
         result = download_article_by_id(book_id, article_id if article_id else '')
         article, article_id = result['content'], result['next']
-        content += "\n\n" + (article if article else '')
+        content.append(article if article else '')
         time.sleep(0.05)
     return content
 
@@ -129,6 +136,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cookie', type=str)
 parser.add_argument('-d', '--download', type=str)
 parser.add_argument('-a', '--article', type=str)
+parser.add_argument('-s', '--separate', action="store_true")
 parser.add_argument('-b', '--books', action="store_true")
 parser.add_argument('-o', '--out', type=str)
 args = parser.parse_args()
@@ -144,10 +152,19 @@ if(args.books and logged):
         print(entry['title'] + "\t" + entry['id'])
 
 if(args.download and not args.article and logged):
-    book: str = get_book_by_id(args.download)
-    book = download_images(book)
-    with open(args.out if args.out else 'book.html', 'w') as html_file:
-        html_file.write(book)
+    if(not args.separate):
+        book: str = get_book_by_id(args.download)
+        book = download_images(book)
+        with open(args.out if args.out else 'book.html', 'w') as html_file:
+            html_file.write(book)
+    else:
+        articles: List[str] = get_book_articles_by_id(args.download)
+        i: int = 1
+        for art in articles:
+            art = download_images(art)
+            with open('{}.html'.format(i), 'w') as html_file:
+                html_file.write(art)
+            i += 1
 
 if(args.article and logged):
     if(not args.download):
