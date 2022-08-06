@@ -10,6 +10,7 @@ import argparse
 from io import BytesIO
 from PIL import Image
 from bs4 import BeautifulSoup
+import os
 
 from requests import Response
 
@@ -111,6 +112,8 @@ def download_images(book_text: str) -> str:
     imgs = soup.findAll('img')
     i: int = 0
     directory = "img/"
+    if not os.path.exists(directory):
+        os.mkdir(directory)
     for img in imgs:
         i+=1
         print('{}/{}...'.format(i, len(imgs)))
