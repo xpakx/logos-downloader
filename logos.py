@@ -128,6 +128,7 @@ def download_images(book_text: str) -> str:
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--cookie', type=str)
 parser.add_argument('-d', '--download', type=str)
+parser.add_argument('-a', '--article', type=str)
 parser.add_argument('-b', '--books', action="store_true")
 parser.add_argument('-o', '--out', type=str)
 args = parser.parse_args()
@@ -142,9 +143,18 @@ if(args.books and logged):
     for entry in books:
         print(entry['title'] + "\t" + entry['id'])
 
-if(args.download and logged):
+if(args.download and not args.article and logged):
     book: str = get_book_by_id(args.download)
     book = download_images(book)
     with open(args.out if args.out else 'book.html', 'w') as html_file:
         html_file.write(book)
+
+if(args.article and logged):
+    if(not args.download):
+        raise ValueError("Cannot download article without book's ID!")
+    article: Optional[str] = download_article_by_id(args.download, args.article)['content']
+    if(article is not None):
+        article = download_images(article)
+        with open(args.out if args.out else 'article.html', 'w') as html_file:
+            html_file.write(article)
 
